@@ -14,7 +14,7 @@ at different Hz rates, topic-based routing, history retention, and subscriber ca
 - **Rate control** — publish at any Hz (1 Hz heartbeat → 200 Hz high-rate telemetry, concurrent)
 - **Message history** — configurable depth per topic, queryable at any time
 - **CSV logging** — subscribers can log all received messages to disk automatically
-- **BestEffort QoS** — slow subscribers drop messages rather than blocking publishers
+- **Non-blocking delivery** — slow subscribers drop messages (bounded per-subscriber queue) rather than blocking publishers
 - **Interactive CLI** — test pub/sub live without writing code
 - **Zero dependencies** — pure Python `asyncio`, no external brokers
 
