@@ -1,6 +1,7 @@
 """In-process message broker."""
 from __future__ import annotations
 import asyncio, time
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -13,11 +14,13 @@ class Message:
 class Topic:
     def __init__(self, name: str, history_depth: int = 100):
         self.name = name; self.history_depth = history_depth
-        self._history: list[Message] = []; self._subscribers: list[asyncio.Queue] = []
+        # deque(maxlen=N)으로 ring-buffer 구현 — append/evict 모두 O(1).
+        # 기존 list + pop(0)은 O(n)이라 high-rate 토픽에서 publish 레이턴시 증가.
+        self._history: deque[Message] = deque(maxlen=history_depth)
+        self._subscribers: list[asyncio.Queue] = []
 
     async def publish(self, msg: Message):
         self._history.append(msg)
-        if len(self._history) > self.history_depth: self._history.pop(0)
         for q in list(self._subscribers):
             try: q.put_nowait(msg)
             except asyncio.QueueFull: pass
